@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRO Enhancement Tool</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>CRO Enhancement Tool</h1>
+            <p class="subtitle">Upload an ad creative + enter a landing page URL to get a personalized, CRO-optimized page</p>
+        </header>
+
+        <section class="input-section">
+            <form id="enhanceForm">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="pageUrl">Landing Page URL</label>
+                        <input type="url" id="pageUrl" name="url" placeholder="https://example.com/landing" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="adFile">Ad Creative</label>
+                        <input type="file" id="adFile" name="ad_creative" accept="image/*">
+                    </div>
+                    <button type="submit" id="submitBtn" class="submit-btn">Enhance</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Loading State -->
+        <section id="loadingState" class="loading-state hidden">
+            <div class="spinner"></div>
+            <p id="loadingText">Analyzing ad creative and landing page...</p>
+        </section>
+
+        <!-- Error State -->
+        <div id="errorState" class="error-state hidden">
+            <p id="errorText"></p>
+        </div>
+
+        <!-- Comparison Panels (FIRST — user sees this immediately) -->
+        <section id="comparisonSection" class="comparison-section hidden">
+            <div class="panel">
+                <div class="panel-header">Original Page</div>
+                <iframe id="originalFrame" sandbox="allow-same-origin allow-scripts"></iframe>
+            </div>
+            <div class="panel">
+                <div class="panel-header enhanced">Enhanced Page</div>
+                <iframe id="enhancedFrame" sandbox="allow-same-origin allow-scripts"></iframe>
+            </div>
+        </section>
+
+        <!-- Report Section (BELOW the preview) -->
+        <section id="reportSection" class="report-section hidden">
+            <h2>Enhancement Report</h2>
+            <div class="report-grid">
+                <div class="report-card">
+                    <h3>Ad Summary</h3>
+                    <p id="reportAdSummary"></p>
+                </div>
+                <div class="report-card">
+                    <h3>Page Summary</h3>
+                    <p id="reportPageSummary"></p>
+                </div>
+                <div class="report-card full-width">
+                    <h3>Alignment Gap</h3>
+                    <p id="reportGap"></p>
+                </div>
+                <div class="report-card full-width">
+                    <h3>CRO Strategy</h3>
+                    <p id="reportStrategy"></p>
+                </div>
+                <div class="report-card full-width">
+                    <h3>Modifications Applied</h3>
+                    <ul id="reportModifications"></ul>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
