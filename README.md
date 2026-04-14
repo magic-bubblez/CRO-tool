@@ -1,4 +1,5 @@
-CRO tool for landing pages
+#CRO tool for landing pages
+
 The tool takes in an ad creative + a landing page URL and produces an enhanced version of the page, aligned with the ad's messaging and following CRO principles.
 
 **Live Demo:** https://cro-tool-3kj8.onrender.com/
