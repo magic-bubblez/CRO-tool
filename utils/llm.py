@@ -9,7 +9,8 @@ from google.genai import types
 
 # Primary: Google AI Studio
 GEMINI_MODEL = "gemini-2.5-flash"
-PRIMARY_TIMEOUT = 30  # seconds before fallback (allows 3 internal retries on empty)
+PRIMARY_TIMEOUT_FAST = 30   # seconds for vision + text analysis
+PRIMARY_TIMEOUT_STRATEGY = 90  # seconds for strategist (large prompt, complex reasoning)
 
 # Fallback chains — different upstreams so they don't fail together
 FALLBACK_VISION_CHAIN = [
@@ -175,7 +176,37 @@ async def _openrouter_chain_text(prompt: str, api_key: str, models: list, max_to
             last_error = e
             continue
 
-    raise ValueError(f"All text fallback models failed. Last error: {last_error}")
+    # Last resort: try Ollama locally
+    try:
+        print("[Ollama] Trying local model as last resort...")
+        result = await _ollama_text(prompt, max_tokens)
+        print("[Ollama] Local model succeeded")
+        return result
+    except Exception as ollama_err:
+        print(f"[Ollama] Failed: {str(ollama_err)[:80]}")
+
+    raise ValueError(f"All models failed (cloud + local). Last cloud error: {last_error}")
+
+
+async def _ollama_text(prompt: str, max_tokens: int = 4000) -> str:
+    """Call local Ollama model. No API key needed."""
+    async with httpx.AsyncClient(timeout=300) as client:  # local models can be slow
+        response = await client.post(
+            "http://localhost:11434/api/chat",
+            json={
+                "model": "gemma3:27b",  # falls back to whatever is available
+                "messages": [{"role": "user", "content": prompt}],
+                "stream": False,
+                "options": {"temperature": 0.3, "num_predict": max_tokens},
+            },
+        )
+    if response.status_code != 200:
+        raise ValueError(f"Ollama error: {response.status_code}")
+    data = response.json()
+    content = data.get("message", {}).get("content", "")
+    if not content:
+        raise ValueError("Ollama returned empty content")
+    return _strip_think(content)
 
 
 # ── Public API with fallback ──
@@ -185,7 +216,7 @@ async def call_vision(image_path: str, prompt: str, gemini_key: str, openrouter_
     try:
         result = await asyncio.wait_for(
             _gemini_vision(image_path, prompt, gemini_key),
-            timeout=PRIMARY_TIMEOUT,
+            timeout=PRIMARY_TIMEOUT_FAST,
         )
         print("[Primary] Gemini vision responded")
         return result
@@ -200,10 +231,11 @@ async def call_vision(image_path: str, prompt: str, gemini_key: str, openrouter_
 
 async def call_text(prompt: str, gemini_key: str, openrouter_key: str = "", max_tokens: int = 4000, use_strategist: bool = False) -> str:
     """Text model — Gemini primary, OpenRouter chain fallback."""
+    timeout = PRIMARY_TIMEOUT_STRATEGY if use_strategist else PRIMARY_TIMEOUT_FAST
     try:
         result = await asyncio.wait_for(
             _gemini_text(prompt, gemini_key, max_tokens),
-            timeout=PRIMARY_TIMEOUT,
+            timeout=timeout,
         )
         label = "strategist" if use_strategist else "analyzer"
         print(f"[Primary] Gemini text responded ({label})")
