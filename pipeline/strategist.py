@@ -10,6 +10,7 @@ async def create_strategy(
     page_analysis: str,
     page_html: str,
     gemini_key: str = "",
+    groq_key: str = "",
     openrouter_key: str = "",
     max_retries: int = 2,
 ) -> dict:
@@ -20,7 +21,7 @@ async def create_strategy(
     )
 
     for attempt in range(max_retries):
-        raw_output = await call_text(prompt, gemini_key, openrouter_key, max_tokens=8000, use_strategist=True)
+        raw_output = await call_text(prompt, gemini_key, groq_key, openrouter_key, max_tokens=8000, use_strategist=True)
 
         if not raw_output:
             if attempt < max_retries - 1:

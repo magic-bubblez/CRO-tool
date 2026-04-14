@@ -9,6 +9,7 @@ from pipeline.orchestrator import run_pipeline
 app = FastAPI(title="CRO Enhancement Tool")
 
 GEMINI_KEY = os.getenv("GEMINI_API_KEY", "")
+GROQ_KEY = os.getenv("GROQ_API_KEY", "")
 OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY", "")
 
 # In-memory store for enhanced pages
@@ -21,8 +22,8 @@ async def enhance_page(
     ad_creative: UploadFile = File(...),
 ):
     """Run the CRO enhancement pipeline."""
-    if not GEMINI_KEY and not OPENROUTER_KEY:
-        raise HTTPException(status_code=500, detail="No API keys set. Add GEMINI_API_KEY and/or OPENROUTER_API_KEY to .env")
+    if not GEMINI_KEY and not GROQ_KEY and not OPENROUTER_KEY:
+        raise HTTPException(status_code=500, detail="No API keys set. Add GEMINI_API_KEY, GROQ_API_KEY, and/or OPENROUTER_API_KEY to .env")
 
     if not ad_creative.filename:
         raise HTTPException(status_code=422, detail="Please upload an ad creative image")
@@ -38,6 +39,7 @@ async def enhance_page(
         result = await run_pipeline(
             url=url,
             gemini_key=GEMINI_KEY,
+            groq_key=GROQ_KEY,
             openrouter_key=OPENROUTER_KEY,
             ad_creative_path=ad_creative_path,
         )

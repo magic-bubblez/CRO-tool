@@ -10,6 +10,7 @@ from pipeline.applier import apply_modifications
 async def run_pipeline(
     url: str,
     gemini_key: str,
+    groq_key: str = "",
     openrouter_key: str = "",
     ad_creative_path: str = "",
 ) -> dict:
@@ -25,12 +26,13 @@ async def run_pipeline(
     ad_analysis = await extract_ad_info(
         ad_creative_path=ad_creative_path,
         gemini_key=gemini_key,
+        groq_key=groq_key,
         openrouter_key=openrouter_key,
     )
 
     # Stage 2: Analyze page
     cleaned_html, page_analysis = await analyze_page(
-        url=url, gemini_key=gemini_key, openrouter_key=openrouter_key,
+        url=url, gemini_key=gemini_key, groq_key=groq_key, openrouter_key=openrouter_key,
     )
 
     # Stage 3: Strategize
@@ -39,6 +41,7 @@ async def run_pipeline(
         page_analysis=page_analysis,
         page_html=cleaned_html,
         gemini_key=gemini_key,
+        groq_key=groq_key,
         openrouter_key=openrouter_key,
     )
 
