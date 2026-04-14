@@ -4,6 +4,9 @@ The tool takes in an ad creative + a landing page URL and produces an enhanced v
 
 **Live Demo:** https://cro-tool-3kj8.onrender.com/
 
+> **to be noted:** this tool runs on free-tier LLM APIs. Gemini 2.5 Flash as the primary LLM with a chain of 6 open-source fallback models via OpenRouter. The quality of the CRO enhancements is directly proportional to the model used. all models are on free tiers which have rate limiting. during testing, the pipeline OFTEN countered errors, reason being: during peak hours all providers are temporarily throttled. if you encounter an issue, trying at a different time of day (with some hour gaps) typically resolves it.
+
+
 ### High Level Flow
 
 The system is a 4-stage pipeline: **extract, analyze, strategize, apply.**
